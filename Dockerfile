@@ -8,6 +8,6 @@ RUN ["dotnet", "restore"]
 
 RUN ["dotnet", "build"]
 
-ENV ["ASPNETCORE_ENVIRONMENT", "Development"]
+ENV ["ASPNETCORE_ENVIRONMENT", "Production"]
 
 CMD ["dotnet", "run"]
