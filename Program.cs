@@ -71,10 +71,10 @@ namespace reQuest.UpdateService
 
                 // Trigger the job to run now, and then repeat every 10 seconds
                 ITrigger trigger = TriggerBuilder.Create()
-                    .WithIdentity("run-delta-60s", "reQuest")
+                    .WithIdentity("run-delta", "reQuest")
                     .StartNow()
                     .WithSimpleSchedule(x => x
-                        .WithIntervalInSeconds(10)
+                        .WithIntervalInSeconds(int.Parse(Program.Configuration["appSettings:frequency"]))
                         .RepeatForever())
                     .Build();
 
@@ -82,7 +82,10 @@ namespace reQuest.UpdateService
                 await scheduler.ScheduleJob(job, trigger);
 
                 // some sleep to show what's happening
-                await Task.Delay(TimeSpan.FromSeconds(60));
+                while (true)
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(10));
+                }
 
                 // and last shut down the scheduler when you are ready to close your program
                 await scheduler.Shutdown();

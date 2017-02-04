@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Quartz;
+using Quartz.Logging;
 using reQuest.UpdateService.Entities;
 
 namespace reQuest.UpdateService
@@ -10,6 +11,8 @@ namespace reQuest.UpdateService
     {
         public async Task Execute(IJobExecutionContext context)
         {
+            ILog log = LogProvider.GetLogger(typeof (DbUpdater));
+
             using (var db = new reQuestDbContext())
             {
                 var activeQuests = db.Quests.Where(q => q.State == QuestState.Active);
@@ -22,7 +25,7 @@ namespace reQuest.UpdateService
                     }
                 }
                 var result = await db.SaveChangesAsync(); 
-                await Console.Error.WriteLineAsync($"[ { result } ] reQuests timed out");
+                log.Info($"[ { result } ] reQuests timed out");
             } 
         }
     }
