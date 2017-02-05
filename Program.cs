@@ -44,11 +44,9 @@ namespace reQuest.UpdateService
                 // Grab the Scheduler instance from the Factory
                 NameValueCollection props = new NameValueCollection
                 {
-                    // { "quartz.serializer.type", "json" }
                     {"quartz.scheduler.instanceName",  "reQuest-UpdateService"},
                     {"quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz"},
                     {"quartz.threadPool.threadCount", "3"}
-
                 };
                 StdSchedulerFactory factory = new StdSchedulerFactory(props);
                 IScheduler scheduler = await factory.GetScheduler();
@@ -56,7 +54,7 @@ namespace reQuest.UpdateService
                 // and start it off
                 await scheduler.Start();
 
-                // define the job and tie it to our HelloJob class
+                // define the job and tie it to our DbUpdater class
                 IJobDetail job = JobBuilder.Create<DbUpdater>()
                     .WithIdentity("update-database", "reQuest")
                     .Build();
