@@ -21,7 +21,6 @@ namespace reQuest.UpdateService
                     if (quest.Ends <= DateTime.UtcNow)
                     {
                         quest.State = QuestState.TimedOut;
-                        await Console.Error.WriteLineAsync();
                     }
                 }
                 var result = await db.SaveChangesAsync(); 

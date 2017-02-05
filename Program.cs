@@ -1,14 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Logging;
-using reQuest.UpdateService.Entities;
 
 namespace reQuest.UpdateService
 {
@@ -18,13 +15,16 @@ namespace reQuest.UpdateService
         public static void Main(string[] args)
         {
             LogProvider.SetCurrentLogProvider(new ConsoleLogProvider());
+            ILog log = LogProvider.GetLogger(typeof (DbUpdater));
+
 
             string environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             if (String.IsNullOrWhiteSpace(environmentName))
             {
-                // throw new ArgumentNullException("Environment not found in ASPNETCORE_ENVIRONMENT");
                 environmentName = "Development";
             }
+
+            log.Info($"Current environment is: {environmentName}");
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -35,18 +35,6 @@ namespace reQuest.UpdateService
 
             Run().GetAwaiter().GetResult();       
 
-            // using (var db = new reQuestDbContext())
-            // {
-            //     var activeQuests = db.Quests.Where(q => q.State == QuestState.Active);
-            //     foreach (var quest in activeQuests)
-            //     {
-            //         if (quest.Ends <= DateTime.UtcNow)
-            //         {
-            //             quest.State = QuestState.TimedOut;
-            //         }
-            //     }
-            //     db.SaveChanges(); 
-            // } 
         }
 
         private static async Task Run()
@@ -57,6 +45,10 @@ namespace reQuest.UpdateService
                 NameValueCollection props = new NameValueCollection
                 {
                     // { "quartz.serializer.type", "json" }
+                    {"quartz.scheduler.instanceName",  "reQuest-UpdateService"},
+                    {"quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz"},
+                    {"quartz.threadPool.threadCount", "3"}
+
                 };
                 StdSchedulerFactory factory = new StdSchedulerFactory(props);
                 IScheduler scheduler = await factory.GetScheduler();
@@ -81,14 +73,14 @@ namespace reQuest.UpdateService
                 // Tell quartz to schedule the job using our trigger
                 await scheduler.ScheduleJob(job, trigger);
 
-                // some sleep to show what's happening
+                // Wait and sleep forever
                 while (true)
                 {
                     await Task.Delay(TimeSpan.FromMinutes(10));
                 }
 
                 // and last shut down the scheduler when you are ready to close your program
-                await scheduler.Shutdown();
+                // await scheduler.Shutdown();
             }
             catch (SchedulerException se)
             {
