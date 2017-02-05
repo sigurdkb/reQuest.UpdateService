@@ -1,5 +1,7 @@
 FROM microsoft/dotnet:latest
 
+ENV ASPNETCORE_ENVIRONMENT Production
+
 COPY . /app
 
 WORKDIR /app
@@ -7,7 +9,5 @@ WORKDIR /app
 RUN ["dotnet", "restore"]
 
 RUN ["dotnet", "build"]
-
-ENV ["ASPNETCORE_ENVIRONMENT", "Production"]
 
 CMD ["dotnet", "run"]
